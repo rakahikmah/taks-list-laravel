@@ -1,0 +1,10 @@
+// untuk insert seeder
+php artisan db:seed
+// untuk buat factory seeder
+php artisan make:factory TaskFactory --model=Task
+// untuk buat model
+php artisan make:model Task
+// permision storage
+chmod -R 775 storage bootstrap/cache
+// untuk masuk dockernnya
+docker exec -it -u 1000 learn_laravel_php bash
