@@ -1,79 +1,50 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-
-class Task
-{
-    public function __construct(
-        public int $id,
-        public string $title,
-        public string $description,
-        public ?string $long_description,
-        public bool $completed,
-        public string $created_at,
-        public string $updated_at
-    ) {}
-}
-
-$tasks = [
-    new Task(
-        1,
-        'Buy groceries',
-        'Task 1 description',
-        'Task 1 long description',
-        false,
-        '2023-03-01 12:00:00',
-        '2023-03-01 12:00:00'
-    ),
-    new Task(
-        2,
-        'Sell old stuff',
-        'Task 2 description',
-        null,
-        false,
-        '2023-03-02 12:00:00',
-        '2023-03-02 12:00:00'
-    ),
-    new Task(
-        3,
-        'Learn programming',
-        'Task 3 description',
-        'Task 3 long description',
-        true,
-        '2023-03-03 12:00:00',
-        '2023-03-03 12:00:00'
-    ),
-    new Task(
-        4,
-        'Take dogs for a walk',
-        'Task 4 description',
-        null,
-        false,
-        '2023-03-04 12:00:00',
-        '2023-03-04 12:00:00'
-    ),
-];
-
-Route::get('/tasks', function () use ($tasks) {
+Route::get('/tasks', function () {
     return view('tasks.index', [
-        'tasks' => $tasks
+        'tasks' => \App\Models\Task::latest()->get(),
     ]);
 })->name('tasks');
 
-Route::get('/task/show/{id}', function ($id) use($tasks) {
-   $task = collect($tasks)->firstWhere('id', $id);
-   if (!$task) {
-       abort(404);
-   }
+Route::get('/task/show/{id}', function ($id) {
+    $task = \App\Models\Task::findOrFail($id);
+
     return view('tasks.show', [
-         'task' => $task
+        'task' => $task
     ]);
 })->name('task.show');
 
+Route::View('/task/create', 'tasks.create')->name('task.create');
+
+
+Route::post('/task/store', function (Request $request) {
+
+    $request->validate([
+        'title' => 'required|max:255',
+        'description' => 'required|max:255',
+        'long_description' => 'required|max:255',
+        'completed' => 'boolean'
+    ]);
+
+    $task = new \App\Models\Task();
+    $task->title = request('title');
+    $task->description = request('description');
+    $task->long_description = request('long_description');
+    $task->completed = request('completed') ? 1 : 0;
+    $task->save();
+
+    return redirect()->route('task.show', [
+        'id' => $task->id
+    ]);
+})->name('task.store');
+
+
 // Route::get('/', function () {
 //     return view('index',[
-       
+
 //         'name' => 'Home',
 //         'safeText' => '<em>Ini aman</em>',
 //         'unsafeText' => '<script>alert("XSS")</script>'

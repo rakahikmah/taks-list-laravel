@@ -8,3 +8,6 @@ php artisan make:model Task
 chmod -R 775 storage bootstrap/cache
 // untuk masuk dockernnya
 docker exec -it -u 1000 learn_laravel_php bash
+--Task::latest()->get()
+Fungsi: Mengambil data terbaru (berdasarkan kolom created_at) dari tabel tasks.
+Behavior: Secara default, latest() akan mengurutkan data berdasarkan kolom created_at dalam urutan menurun (dari yang terbaru). Jika data tidak memiliki kolom created_at, kamu bisa menentukan kolom lain untuk diurutkan.
