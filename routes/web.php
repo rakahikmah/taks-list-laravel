@@ -1,45 +1,52 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
+use App\Http\Requests\TaskRequest;
+use App\Models\Task;
+
 
 Route::get('/tasks', function () {
     return view('tasks.index', [
-        'tasks' => \App\Models\Task::latest()->get(),
+        'tasks' => \App\Models\Task::latest()->paginate(10),
     ]);
 })->name('tasks');
 
-Route::get('/task/show/{id}', function ($id) {
-    $task = \App\Models\Task::findOrFail($id);
-
+Route::get('/task/show/{task}', function (Task $task) {
     return view('tasks.show', [
         'task' => $task
     ]);
 })->name('task.show');
 
+
 Route::View('/task/create', 'tasks.create')->name('task.create');
 
 
-Route::post('/task/store', function (Request $request) {
-
-    $request->validate([
-        'title' => 'required|max:255',
-        'description' => 'required|max:255',
-        'long_description' => 'required|max:255',
-        'completed' => 'boolean'
-    ]);
-
-    $task = new \App\Models\Task();
-    $task->title = request('title');
-    $task->description = request('description');
-    $task->long_description = request('long_description');
-    $task->completed = request('completed') ? 1 : 0;
-    $task->save();
-
+Route::post('/task', function (TaskRequest $request) {
+    $task = Task::create($request->validated());
     return redirect()->route('task.show', [
-        'id' => $task->id
-    ]);
+        'task' => $task->id
+    ])->with('success', 'Task created successfully');
 })->name('task.store');
+
+
+Route::get('/task/{task}/edit', function (Task $task) {
+    return view('tasks.edit', [
+        'task' => $task
+    ]);
+})->name('task.edit');
+
+
+Route::put('/task/{task}', function (Task $task, TaskRequest $request) {
+    $task->update($request->validated());
+    return redirect()->route('task.show', [
+        'task' => $task->id
+    ])->with('success', 'Task updated successfully');
+})->name('task.update');
+
+Route::delete('/task/{task}', function (Task $task) {
+    $task->delete();
+    return redirect()->route('tasks')->with('success', 'Task deleted successfully');
+})->name('task.delete');
 
 
 // Route::get('/', function () {
@@ -51,9 +58,9 @@ Route::post('/task/store', function (Request $request) {
 //     ]);
 // });
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+});
 
 Route::get('/hello', function () {
     return 'Hello World';
@@ -71,7 +78,6 @@ Route::get('/hellodirect', function () {
 Route::get('/hello/{name}/{umur}', function ($name, $umur) {
     return 'Hello ' . $name . ' umur ' . $umur;
 });
-
 
 // Ini adalah untuk menangkap semua route yang tidak ada
 Route::fallback(function () {

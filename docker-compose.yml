@@ -22,11 +22,16 @@ services:
     container_name: learn_laravel_php
     volumes:
       - .:/var/www/html
+      - ~/.composer/cache:/root/.composer/cache  # Composer cache untuk percepatan
     working_dir: /var/www/html
     networks:
       - rhr_network
     depends_on:
       - redis
+    environment:
+      - PHP_IDE_CONFIG=serverName=Docker
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_MAX_FILESIZE=200M
 
   redis:
     image: redis:latest
@@ -35,12 +40,15 @@ services:
       - "6379:6379"
     networks:
       - rhr_network
+    volumes:
+      - redis_data:/data
 
   node:
     image: node:16
     container_name: learn_laravel_node
     volumes:
       - .:/var/www/html
+      - ~/.npm:/root/.npm  # NPM cache untuk percepatan
     working_dir: /var/www/html
     tty: true
     ports:
@@ -49,7 +57,13 @@ services:
       - rhr_network
     depends_on:
       - php
+    environment:
+      - NODE_ENV=development
 
 networks:
   rhr_network:
     external: true
+
+volumes:
+  redis_data:
+    driver: local
