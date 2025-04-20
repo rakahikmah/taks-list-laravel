@@ -18,4 +18,11 @@ class Task extends Model
     protected $casts = [
         'completed' => 'boolean',
     ];
+
+
+    public function toogleCompleted()
+    {
+        $this->completed = !$this->completed;
+        $this->save();
+    }
 }

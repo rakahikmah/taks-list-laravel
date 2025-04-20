@@ -5,9 +5,9 @@ use App\Http\Requests\TaskRequest;
 use App\Models\Task;
 
 
-Route::get('/tasks', function () {
+Route::get('/tasks', function (Task $task) {
     return view('tasks.index', [
-        'tasks' => \App\Models\Task::latest()->paginate(10),
+        'tasks' => Task::latest()->paginate(10),
     ]);
 })->name('tasks');
 
@@ -47,6 +47,12 @@ Route::delete('/task/{task}', function (Task $task) {
     $task->delete();
     return redirect()->route('tasks')->with('success', 'Task deleted successfully');
 })->name('task.delete');
+
+Route::put('tasks/{task}/toggle-completed', function (Task $task) {
+    $task->toogleCompleted();
+
+    return redirect()->back()->with('success', 'Task updated successfully');
+})->name('task.toggle-complete');
 
 
 // Route::get('/', function () {
